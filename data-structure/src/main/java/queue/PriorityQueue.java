@@ -19,6 +19,12 @@ public class PriorityQueue<E> implements Queue<E> {
         queue = new Object[DEFAULT_CAPACITY];
     }
 
+    @Override
+    public boolean add(E e) {
+        return offer(e);
+    }
+
+    @Override
     public boolean offer(E e) {
         if (e == null) {
             throw new NullPointerException();
@@ -38,8 +44,8 @@ public class PriorityQueue<E> implements Queue<E> {
 
     private void grow(int minCapacity) {
         int oldCapacity = queue.length;
-        // Double size if small; else grow by 50%
-        int newCapacity = oldCapacity +  ((oldCapacity < 64) ?
+        // Double if small; else up by 50%
+        int newCapacity = oldCapacity + ((oldCapacity < 64) ?
                 (oldCapacity + 2) :
                 (oldCapacity >> 1));
         // overflow-conscious code
@@ -51,39 +57,30 @@ public class PriorityQueue<E> implements Queue<E> {
         queue = Arrays.copyOf(queue, newCapacity);
     }
 
-    private void siftUp(int k, E x) {
-        siftUpComparable(k, x);
+    private void siftUp(int k, E e) {
+        siftUpComparable(k, e);
     }
 
     @SuppressWarnings("unchecked")
-    private void siftUpComparable(int k, E x) {
-        Comparable<? super E> key = (Comparable<? super E>) x;
-        logger.info("[入队] 元素: {} 当前队列: {}", JSON.toJSONString(key), JSON.toJSONString(queue));
+    private void siftUpComparable(int k, E e) {
+        Comparable<? super E> key = (Comparable<? super E>) e;
+        logger.info("[入队] 元素：{} 当前队列：{}", JSON.toJSONString(key), JSON.toJSONString(queue));
         while (k > 0) {
-            // 获取父节点idx，相当于除以2
             int parent = (k - 1) >>> 1;
-            logger.info("[入队] 寻找当前节点的父节点位置。k: {} parent: {}", k, parent);
-            Object e = queue[parent];
-            // 如果当前位置元素大于父节点元素，退出循环
-            if (key.compareTo((E) e) >= 0) {
-                logger.info("[入队] 值比对，父节点：{} 目标节点: {}", JSON.toJSONString(e), JSON.toJSONString(key));
+            logger.info("[入队] 寻找父节点位置 k：{} parent：{}", JSON.toJSONString(k), JSON.toJSONString(parent));
+            Object e_parent = queue[parent];
+            if (key.compareTo((E) e_parent) >= 0) {
+                logger.info("[入队] 值比对：父节点：{} 当前节点：{}", JSON.toJSONString(e_parent), JSON.toJSONString(key));
                 break;
             }
-            // 相反，父节点元素大于当前元素，进行替换
-            logger.info("[入队] 替换过程，父子节点位置替换，继续循环。父节点值: {} 存放到位置: {}", JSON.toJSONString(e), k);
-            queue[k] = key;
+            logger.info("[入队] 节点替换，继续循环：父节点值：{} 替换至：{}", JSON.toJSONString(e_parent), JSON.toJSONString(k));
+            queue[k] = e_parent;
             k = parent;
         }
         queue[k] = key;
-        logger.info("[入队] 完成 Idx: {} Val: {} \r\n当前队列: {}\r\n", k, JSON.toJSONString(key), JSON.toJSONString(queue));
+        logger.info("[入队] 完成：Idx：{} Val：{} \r\n 当前队列：{} \r\n", k, JSON.toJSONString(key), JSON.toJSONString(queue));
     }
 
-    @Override
-    public boolean add(E e) {
-        return offer(e);
-    }
-
-    @SuppressWarnings("unchecked")
     @Override
     public E poll() {
         if (size == 0) {
@@ -103,32 +100,29 @@ public class PriorityQueue<E> implements Queue<E> {
         siftDownComparable(k, x);
     }
 
-    @SuppressWarnings("unchecked")
     private void siftDownComparable(int k, E x) {
         Comparable<? super E> key = (Comparable<? super E>) x;
-        // 先找出中间件节点
         int half = size >>> 1;
         while (k < half) {
-            // 找到左子节点和右子节点，两个节点进行比较，找出最大的值
             int child = (k << 1) + 1;
             Object c = queue[child];
             int right = child + 1;
-            // 左子节点与右子节点比较，取最小的节点
+            // 左右节点比较，取最小值
             if (right < size && ((Comparable<? super E>) c).compareTo((E) queue[right]) > 0) {
-                logger.info("【出队】左右子节点比对，获取最小值。left：{} right：{}", JSON.toJSONString(c), JSON.toJSONString(queue[right]));
+                logger.info("[出队] 左右节点比对，取最小值。left: {} right: {}", JSON.toJSONString(c), JSON.toJSONString(queue[right]));
                 c = queue[child = right];
             }
-            // 目标值与c比较，当目标值小于c值，退出循环。说明此时目标值所在位置适合，迁移完成。
+            // 目标值小于child，位置正确，迁移完成
             if (key.compareTo((E) c) <= 0) {
                 break;
             }
-            // 目标值小于c值，位置替换，继续比较
-            logger.info("【出队】替换过程，节点的值比对。上节点：{} 下节点：{} 位置替换", JSON.toJSONString(queue[k]), JSON.toJSONString(c));
+            // 目标值大于child，替换位置，继续循环
+            logger.info("[出队] 替换过程 上节点：{} 下节点：{} 位置替换", JSON.toJSONString(queue[k]), JSON.toJSONString(c));
             queue[k] = c;
             k = child;
         }
         // 把目标值放到对应位置
-        logger.info("【出队】替换结果，最终更换位置。Idx：{} Val：{}", k, JSON.toJSONString(key));
+        logger.info("[出队] 替换结果，最终更换位置。Idx：{} Val：{}", k, JSON.toJSONString(key));
         queue[k] = key;
     }
 
@@ -137,5 +131,4 @@ public class PriorityQueue<E> implements Queue<E> {
     public E peek() {
         return (size == 0) ? null : (E) queue[0];
     }
-
 }

@@ -7,23 +7,23 @@ import static java.util.concurrent.TimeUnit.NANOSECONDS;
 
 public class DelayQueue<E extends Delayed> implements BlockingQueue<E>{
     private final transient ReentrantLock lock = new ReentrantLock();
-    private final PriorityQueue<E> q = new PriorityQueue<>();
 
-    private final Condition available = lock.newCondition();
+    private final PriorityQueue<E> queue = new PriorityQueue<>();
+
+    private final Condition avaliable = lock.newCondition();
 
     @Override
     public boolean add(E e) {
         return offer(e);
     }
 
-    @Override
     public boolean offer(E e) {
         final ReentrantLock lock = this.lock;
         lock.lock();
         try {
-            q.offer(e);
-            if (q.peek() == e) {
-                available.signal();
+            queue.offer(e);
+            if (queue.peek() == e) {
+                avaliable.signal();
             }
             return true;
         } finally {
@@ -36,26 +36,24 @@ public class DelayQueue<E extends Delayed> implements BlockingQueue<E>{
         final ReentrantLock lock = this.lock;
         lock.lock();
         try {
-            E first = q.peek();
+            E first = queue.peek();
             if (first == null || first.getDelay(NANOSECONDS) > 0) {
                 return null;
             } else {
-                return q.poll();
+                return queue.poll();
             }
         } finally {
             lock.unlock();
         }
     }
 
-    @Override
     public E peek() {
         final ReentrantLock lock = this.lock;
         lock.lock();
         try {
-            return q.peek();
+            return queue.peek();
         } finally {
             lock.unlock();
         }
     }
-
 }
