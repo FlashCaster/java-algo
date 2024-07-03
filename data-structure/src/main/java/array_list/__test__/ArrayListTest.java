@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class ArrayListTest {
+
     private final Logger logger = LoggerFactory.getLogger(ArrayListTest.class);
 
     @Test
@@ -30,6 +31,6 @@ public class ArrayListTest {
         list.remove(9);
 
         logger.info(list.toString());
-
     }
+
 }

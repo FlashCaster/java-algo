@@ -2,21 +2,30 @@ package array_list;
 
 import java.util.Arrays;
 
-public abstract class ArrayList<E> implements List<E> {
-    // 初始化空间
+public class ArrayList<E> implements List<E> {
+
+    /**
+     * 默认初始化空间
+     */
     private static final int DEFAULT_CAPACITY = 10;
 
-    // 空元素
+    /**
+     * 空元素
+     */
     private static final Object[] DEFAULTCAPACITY_EMPTY_ELEMENTDATA = {};
 
-    // ArrayList元素缓存区
+    /**
+     * ArrayList 元素数组缓存区
+     */
     transient Object[] elementData;
 
-    // size
+    /**
+     * List 集合元素数量
+     */
     private int size;
 
     public ArrayList() {
-        // 默认给个空元素，在开始添加元素时初始化长度
+        // 默认给个空的元素，当开始添加元素的时候在初始化长度
         this.elementData = DEFAULTCAPACITY_EMPTY_ELEMENTDATA;
     }
 
@@ -27,9 +36,8 @@ public abstract class ArrayList<E> implements List<E> {
         if (elementData == DEFAULTCAPACITY_EMPTY_ELEMENTDATA) {
             minCapacity = Math.max(DEFAULT_CAPACITY, minCapacity);
         }
-
         // 判断扩容操作
-        if (minCapacity > elementData.length) {
+        if (minCapacity - elementData.length > 0) {
             int oldCapacity = elementData.length;
             int newCapacity = oldCapacity + (oldCapacity >> 1);
             if (newCapacity - minCapacity < 0) {
@@ -37,7 +45,6 @@ public abstract class ArrayList<E> implements List<E> {
             }
             elementData = Arrays.copyOf(elementData, newCapacity);
         }
-
         // 添加元素
         elementData[size++] = e;
         return true;
@@ -48,9 +55,10 @@ public abstract class ArrayList<E> implements List<E> {
         E oldValue = (E) elementData[index];
         int numMoved = size - index - 1;
         if (numMoved > 0) {
+            // 从原始数组的某个位置，拷贝到目标对象的某个位置开始后n个元素
             System.arraycopy(elementData, index + 1, elementData, index, numMoved);
         }
-        elementData[--size] = null;
+        elementData[--size] = null; // clear to let GC do its work
         return oldValue;
     }
 
@@ -61,6 +69,10 @@ public abstract class ArrayList<E> implements List<E> {
 
     @Override
     public String toString() {
-        return Arrays.toString(elementData);
+        return "ArrayList{" +
+                "elementData=" + Arrays.toString(elementData) +
+                ", size=" + size +
+                '}';
     }
+
 }
